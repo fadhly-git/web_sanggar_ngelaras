@@ -99,13 +99,18 @@ Route::middleware(['auth', 'verified', 'throttle:10,2'])->group(function () {
                     FileUpload::class, 'update'
                 ])->name('atmin.konten-manajemen.galeri.update');
 
-                Route::delete('destroy/{any}/{id}', [FileUpload::class, 'destroy'])->name('atmin.konten-manajemen.galeri.destroy');
+                Route::delete('destroy/{id}', [FileUpload::class, 'destroyGaleri'])->name('atmin.konten-manajemen.galeri.destroy');
             });
             //|---------------------------end gallery-----------------------------------
 
-            Route::get('kontak-kami', function () {
-                return Inertia::render('konten-manajemen/kontak-kami');
-            })->name('atmin.konten-manajemen.kontak-kami');
+            //|----------------------------------------------------------------------
+            //| Kontak Kami
+            //|----------------------------------------------------------------------
+            Route::group(['prefix' => 'kontak-kami'], function () {
+                Route::get('index', function () {
+                    return Inertia::render('admin/konten-manajemen/kontak-kami/page');
+                })->name('atmin.konten-manajemen.kontak-kami.index');
+            });
 
             //|----------------------------------------------------------------------
             //| Banner

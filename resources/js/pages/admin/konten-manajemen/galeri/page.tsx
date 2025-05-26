@@ -37,8 +37,8 @@ export default function Gallery() {
                 <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                     <div className="grid auto-rows-min gap-4 md:grid-cols-1">
                         <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-fit place-content-start rounded-xl border">
-                            <div className="mx-auto flex flex-row gap-2 p-4 w-full">
-                                <div className='flex w-full items-center justify-start'>
+                            <div className="mx-auto flex w-full flex-row gap-2 p-4">
+                                <div className="flex w-full items-center justify-start">
                                     <h2 className="text-xl font-black">Data Galeri Kegiatan</h2>
                                 </div>
 
@@ -50,10 +50,8 @@ export default function Gallery() {
                             </div>
                         </div>
                         <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-fit place-content-center rounded-xl border">
-                            <div className="border-sidebar-border/70 dark:border-sidebar-border m-4 rounded-xl border">
-                                <div className="p-4">
-                                    <ShowGallery />
-                                </div>
+                            <div className="">
+                                <ShowGallery />
                             </div>
                         </div>
                     </div>

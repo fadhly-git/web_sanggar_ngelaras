@@ -1,9 +1,11 @@
-import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
-
+import { AlertDialogTemplate } from '@/components/alert-template';
 import { Button } from '@/components/ui/button';
 import { Carousel, CarouselApi, CarouselContent, CarouselItem } from '@/components/ui/carousel';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useDataContext } from './data-context';
+import axios from "axios"; // <-- tambahkan
+import { toast } from "sonner"; // <-- tambahkan, atau dari react-hot-toast
 
 export interface ShowGalleryItem {
     id: number;
@@ -16,17 +18,60 @@ export interface ShowGalleryProps {
     title?: string;
     description?: string;
     items: ShowGalleryItem[];
+    handleOpen?: () => void;
 }
 
 const ShowGallery = () => {
-    const { gallery } = useDataContext();
+    const { gallery, trigerRefetch } = useDataContext();
+    const [open, setOpen] = useState(false);
+    const [id, setId] = useState<number | null>(null);
+    const handleOpen = (id: number) => {
+        setId(id);
+        setOpen(true);
+    };
+    const handleClose = () => {
+        setOpen(false);
+        setId(null);
+    };
+    const handleDelete = () => {
+        axios
+            .delete('/atmin/konten-manajemen/galeri/destroy/' + id)
+            .then((res) => {
+                toast.success('Berhasil menghapus galeri',{
+                    description: res.data.message,
+                });
+                handleClose();
+                trigerRefetch();
+            })
+            .catch((err) => {
+                toast.error('Gagal menghapus galeri', {
+                    description: err.response?.data?.message || 'Terjadi kesalahan saat menghapus galeri.',
+                });
+            });
+    };
 
     return (
         <>
+            <AlertDialogTemplate
+                title="Hapus Data Galeri"
+                description="Apakah Anda yakin ingin menghapus galeri ini?"
+                open={open}
+                handleClose={handleClose}
+                onAction={handleDelete}
+                actionText="Hapus"
+                cancelText="Batal"
+            />
             {gallery.map((item, index) => (
                 <div className="border-sidebar-border/70 dark:border-sidebar-border m-4 rounded-xl border">
                     <div className="p-4">
-                        <Prev key={index} title={item.title} description={item.deskripsi} items={item.items} id={item.id} />
+                        <Prev
+                            key={index}
+                            title={item.title}
+                            description={item.deskripsi}
+                            items={item.items}
+                            id={item.id}
+                            handleOpen={() => handleOpen(Number(item.id))}
+                        />
                     </div>
                 </div>
             ))}
@@ -34,18 +79,11 @@ const ShowGallery = () => {
     );
 };
 
-export const Prev = ({ title, description, items, id }: ShowGalleryProps) => {
+export const Prev = ({ title, description, items, id, handleOpen }: ShowGalleryProps) => {
     const [carouselApi, setCarouselApi] = useState<CarouselApi>();
     const [canScrollPrev, setCanScrollPrev] = useState(false);
     const [canScrollNext, setCanScrollNext] = useState(false);
     const [currentSlide, setCurrentSlide] = useState(0);
-
-    const handleRemove = (id: number) => {
-        if (confirm('Apakah Anda yakin ingin menghapus galeri ini?')) {
-            // TODO: implement remove logic here
-            console.log('Remove gallery with id:', id);
-        }
-    };
 
     const handleEdit = (id: number) => {
         window.location.href = '/atmin/konten-manajemen/galeri/edit/' + id;
@@ -77,14 +115,7 @@ export const Prev = ({ title, description, items, id }: ShowGalleryProps) => {
                         </div>
                         <div className="flex flex-row items-center gap-2 pt-2 md:flex-col md:gap-4 md:pt-0">
                             <div className="w-full">
-                                <Button
-                                    size={'sm'}
-                                    variant="destructive"
-                                    className="mx-auto mt-2 w-full md:mt-0"
-                                    onClick={() => {
-                                        handleRemove(id);
-                                    }}
-                                >
+                                <Button size={'sm'} variant="destructive" className="mx-auto mt-2 w-full md:mt-0" onClick={handleOpen} >
                                     Hapus
                                 </Button>
                                 <Button
