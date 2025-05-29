@@ -59,14 +59,14 @@ const data = {
                     url: '/atmin/konten-manajemen/galeri/index',
                 },
                 {
-                    title: 'Kontak Kami',
+                    title: 'Kontak Kami & Faqs',
                     url: '/atmin/konten-manajemen/kontak-kami/index',
                 },
             ],
         },
         {
             title: 'Berita',
-            url: '#',
+            url: '/atmin/berita/index',
             icon: NewspaperIcon,
         },
         {

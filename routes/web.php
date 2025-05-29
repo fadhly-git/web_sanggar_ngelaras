@@ -4,9 +4,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use Inertia\Inertia;
+
+use App\Http\Controllers\NewsItems as NewsItemsController;
 use App\Http\Controllers\Admin\AboutUs;
 use App\Http\Controllers\Admin\FileUploadController as FileUpload;
 use App\Http\Controllers\Admin\GaleriController as Galleri;
+use App\Http\Controllers\Admin\ContactUsController as ContactUs;
 use App\Http\Controllers\Admin\HeroController;
 use App\Http\Controllers\Dev\DevController;
 
@@ -40,7 +43,7 @@ Route::middleware(['web', 'throttle:10,2'])->group(function () {
 //|--------------------------------------------------------------------------
 //| Auth Routes
 //|--------------------------------------------------------------------------
-Route::middleware(['auth', 'verified', 'throttle:10,2'])->group(function () {
+Route::middleware(['auth', 'verified', 'throttle:10,1'])->group(function () {
 
 //|--------------------------------------------------------------------------
 //| Admin Routes
@@ -55,9 +58,15 @@ Route::middleware(['auth', 'verified', 'throttle:10,2'])->group(function () {
             return Inertia::render('admin/app-settings');
         })->name('atmin.app-settings');
 
-        Route::get('berita', function () {
-            return Inertia::render('admin/berita');
-        })->name('atmin.berita');
+        Route::prefix('berita')->group(function () {
+            Route::get('index', function () {
+                return Inertia::render('admin/news/page');
+            })->name('atmin.berita.index');
+
+            Route::get('create', function () {
+                return Inertia::render('admin/news/create');
+            })->name('atmin.berita.create');
+        });
 
         //|----------------------------------------------------------------------
         //| Konten Management
@@ -110,6 +119,12 @@ Route::middleware(['auth', 'verified', 'throttle:10,2'])->group(function () {
                 Route::get('index', function () {
                     return Inertia::render('admin/konten-manajemen/kontak-kami/page');
                 })->name('atmin.konten-manajemen.kontak-kami.index');
+
+                Route::post('update', [ContactUs::class, 'update'])->name('atmin.konten-manajemen.kontak-kami.update');
+
+                Route::post('store-faqs', [ContactUs::class, 'storeFaqs'])->name('atmin.konten-manajemen.kontak-kami.store-faqs');
+
+                Route::delete('destroy-faqs/{id}', [ContactUs::class, 'destroyFaqs'])->name('atmin.konten-manajemen.kontak-kami.destroy-faqs');
             });
 
             //|----------------------------------------------------------------------
@@ -143,7 +158,8 @@ Route::middleware(['auth', 'verified', 'throttle:10,2'])->group(function () {
         //|--------------------------------------------------------------------------
 
         Route::group(['prefix' => 'developing'], function () {
-            Route::get('index', [DevController::class, 'index'])->name('atmin.dev.index');
+            Route::get('index', [DevController::class, 'index'])->name('atmin.developing.index');
+            Route::get('show-token', [DevController::class, 'show'])->name('atmin.developing.show-token');
         });
         //|-------------------------- end dev routes -------------------------------
     });
@@ -161,6 +177,7 @@ Route::middleware(['auth', 'verified', 'throttle:10,2'])->group(function () {
         Artisan::call('cache:clear');
         Artisan::call('route:clear');
         Artisan::call('view:clear');
+
         Log::info('Cache cleared by ' . auth()->user()->name . ' at ' . now());
         return response()->json([
             'status' => 'success',

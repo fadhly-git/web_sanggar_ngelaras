@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Dev;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-
+use Illuminate\Support\Facades\Auth;
 use App\Models\Banners;
 use App\Models\Image;
 
@@ -80,9 +80,19 @@ class DevController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show()
     {
-        //
+        $user = Auth::user();
+
+        // Hapus token lama jika ada (opsional)
+        $user->tokens()->delete();
+
+        // Buat token baru
+        $token = $user->createToken('auth-token')->plainTextToken;
+        $user = auth()->user();
+        return response()->json([
+            'api_token' => $token, // Kirim token via props
+        ])->withCookie(cookie('auth-token', $token, 60 * 24 * 7, null, null, false, false));
     }
 
     /**

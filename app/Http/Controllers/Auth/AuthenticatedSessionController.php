@@ -33,7 +33,16 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('atmin.dashboard', absolute: false));
+        // Ambil pengguna yang diautentikasi
+        $user = $request->user();
+
+        // Buat token menggunakan Sanctum
+        // Membuat token dengan masa berlaku 7 hari (opsional, Sanctum memiliki default)
+        $token = $user->createToken('auth-token', ['*'], now()->addDays(7))->plainTextToken;
+        // Redirect dengan token (misalnya, melalui sesi atau respons JSON)
+        // Dalam contoh ini, kita akan menggunakan sesi flash untuk menyimpan token
+        return redirect(route('atmin.dashboard'))->withCookie(cookie('auth-token', $token, 60 * 24 * 7, null, null, false, false));
+
     }
 
     /**
@@ -41,8 +50,11 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        // Hapus semua token akses pengguna
+        $user = $request->user();
+        $user->tokens()->delete();
         Auth::guard('web')->logout();
-
+        // Invalidate sesi dan meregenerasi token sesi
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

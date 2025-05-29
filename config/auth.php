@@ -39,7 +39,16 @@ return [
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
+            'remember_me' => true, // Pastikan fitur "Ingat Saya" diaktifkan
+            'expire' => 10080, // Masa berlaku dalam menit (7 hari = 7 * 24 * 60 = 10080 menit)
         ],
+    ],
+
+
+    'api' => [
+        'driver' => 'sanctum',
+        'provider' => 'users',
+        'hash' => false,
     ],
 
     /*
@@ -110,6 +119,6 @@ return [
     |
     */
 
-    'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
+    'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 60 * 60),
 
 ];

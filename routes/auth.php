@@ -31,7 +31,12 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+
     Route::group(['prefix' => 'atmin'], function () {
+        Route::get('login', function(){
+            return redirect()->route('atmin.dashboard');
+        })->name('login.atmin');
+
         Route::get('register', [RegisteredUserController::class, 'create'])
             ->name('register');
 

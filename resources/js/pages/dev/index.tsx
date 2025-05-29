@@ -24,21 +24,28 @@ export default function DEv() {
     const [uri, setUri] = useState<string>('');
     const [data, setData] = useState<any>([]);
     const [type, setType] = useState<string>('get');
-
-    const HandleSubmit = () => {
+    const HandleSubmit = async () => {
         setData([]);
         if (type === 'get') {
-            axios
-                .get(uri)
-                .then((res) => {
-                    toast.success('Fetch data success');
-                    setData(res.data);
-                })
-                .catch((err) => {
-                    setData(err.response.data.message);
-                });
+            try {
+                await axios.get('/sanctum/csrf-cookie');
+                axios
+                    .get(uri)
+                    .then((res) => {
+                        toast.success('Fetch data success');
+                        setData(res.data);
+                    })
+                    .catch((err) => {
+                        setData(err.response.data.message);
+                    });
+            } catch (error) {
+                console.error('Error fetching CSRF token:', error);
+                toast.error('Failed to fetch CSRF token');
+            }
         } else if (type === 'post') {
-            axios
+            try {
+                await axios.get('/sanctum/csrf-cookie');
+                axios
                 .post(uri)
                 .then((res) => {
                     toast.success('Fetch data success');
@@ -47,6 +54,18 @@ export default function DEv() {
                 .catch((err) => {
                     setData(err.response.data.message);
                 });
+            } catch (error) {
+                console.error('Error fetching CSRF token:', error);
+                toast.error('Failed to fetch CSRF token');
+                return;
+            }
+        }
+    };
+
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.ctrlKey && event.key === 'Enter') {
+            event.preventDefault();
+            HandleSubmit();
         }
     };
 
@@ -57,7 +76,7 @@ export default function DEv() {
                     <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-fit place-content-start rounded-xl border">
                         <div className="mx-auto gap-2 p-4">
                             <h2 className="text-xl font-black">Fetch Data Api Json</h2>
-                            <Input type="link" value={uri} onChange={(e) => setUri(e.target.value)} placeholder="masukkan uri" />
+                            <Input type="link" value={uri} onChange={(e) => setUri(e.target.value)} placeholder="masukkan uri" onKeyDown={handleKeyDown} />
                             <div className="mt-2 grid gap-2">
                                 <Label htmlFor="type">Type</Label>
                                 <Select value={type} onValueChange={setType}>
@@ -121,7 +140,6 @@ export function CodeRunner({ data }: CodeRunnerWithDataProps) {
         try {
             // Membuat fungsi baru dengan variabel 'data' tersedia di scope
             // Kode yang diinput user harus return sesuatu atau gunakan 'data' langsung
-            // eslint-disable-next-line no-new-func
             const fn = new Function('data', `"use strict";\n${code}`);
             const result = fn(data);
             if (typeof result === 'object') {
@@ -155,11 +173,6 @@ export function CodeRunner({ data }: CodeRunnerWithDataProps) {
             <Button
                 size={'sm'}
                 onClick={handleRun}
-                onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                        console.log('Enter ditekan!');
-                    }
-                }}
             >
                 Run
             </Button>
@@ -167,10 +180,12 @@ export function CodeRunner({ data }: CodeRunnerWithDataProps) {
                 <label className="font-bold">Output:</label>
                 <div className="border-sidebar-border/70 dark:border-sidebar-border relative h-fit place-content-center rounded-xl border">
                     <div className="p-4">
-                        <pre className="bg-muted mt-1 rounded p-2">{output}</pre>
+                        <pre className="bg-muted mt-1 rounded p-2 text-pretty break-words whitespace-pre-wrap">{output}</pre>
                     </div>
                 </div>
             </div>
         </div>
     );
 }
+
+

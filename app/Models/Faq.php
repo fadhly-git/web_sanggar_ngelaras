@@ -22,4 +22,18 @@ class Faq extends Model
     {
         return $query->where('is_active', true);
     }
+
+    public static function store(array $data)
+    {
+        return self::updateOrCreate(
+            ['id' => $data['id'] ?? null], // Use 'id' from data if available
+            $data
+        );
+    }
+
+
+    public function getData()
+    {
+        return $this->active()->get();
+    }
 }
